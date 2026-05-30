@@ -128,3 +128,112 @@
     @apply font-sans;
   }
 }
+
+/* Landing animations */
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes landing-float-reverse {
+  0%,
+  100% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+@keyframes landing-orb-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(3%, -4%) scale(1.05);
+  }
+  66% {
+    transform: translate(-2%, 2%) scale(0.97);
+  }
+}
+
+.landing-fade-up {
+  opacity: 0;
+  animation: landing-fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.landing-float {
+  animation: landing-float 5s ease-in-out infinite;
+}
+
+.landing-float-delayed {
+  animation: landing-float-reverse 4.5s ease-in-out infinite;
+  animation-delay: 0.8s;
+}
+
+.landing-float-reverse {
+  animation: landing-float-reverse 5.5s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+
+.landing-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  animation: landing-orb-drift 18s ease-in-out infinite;
+}
+
+.landing-orb-1 {
+  top: -10%;
+  left: 10%;
+  width: 420px;
+  height: 420px;
+  background: oklch(0.92 0.02 260 / 0.5);
+}
+
+.landing-orb-2 {
+  top: 20%;
+  right: -5%;
+  width: 360px;
+  height: 360px;
+  background: oklch(0.94 0.015 180 / 0.45);
+  animation-delay: -6s;
+}
+
+.landing-orb-3 {
+  bottom: -5%;
+  left: 30%;
+  width: 300px;
+  height: 300px;
+  background: oklch(0.93 0.02 320 / 0.35);
+  animation-delay: -12s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-fade-up,
+  .landing-float,
+  .landing-float-delayed,
+  .landing-float-reverse,
+  .landing-orb {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
