@@ -12,7 +12,7 @@ export default function HomePage() {
             <span className="text-lg font-semibold tracking-tight">ReservaYa</span>
           </div>
           <Button variant="ghost" asChild>
-            <Link href="/admin">Panel</Link>
+            <Link href="/admin">Para profesionales</Link>
           </Button>
         </div>
       </header>
@@ -34,7 +34,7 @@ export default function HomePage() {
               <Link href="/reservar/maria-garcia">Ver demo de reserva</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="/admin">Configurar mi agenda</Link>
+              <Link href="/admin">Soy profesional</Link>
             </Button>
           </div>
         </section>

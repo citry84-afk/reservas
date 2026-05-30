@@ -15,8 +15,12 @@ export default function AdminLoginPage() {
         <CardContent>
           <LoginForm />
           <p className="mt-6 text-center text-sm text-muted-foreground">
+            <Link href="/admin" className="underline hover:text-foreground">
+              ¿Qué es ReservaYa?
+            </Link>
+            {" · "}
             <Link href="/" className="underline hover:text-foreground">
-              Volver al inicio
+              Inicio
             </Link>
           </p>
         </CardContent>
