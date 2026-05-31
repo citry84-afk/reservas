@@ -9,6 +9,10 @@ export const providers = sqliteTable("providers", {
   phone: text("phone"),
   description: text("description"),
   timezone: text("timezone").notNull().default("Europe/Madrid"),
+  depositEnabled: integer("deposit_enabled", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  depositCents: integer("deposit_cents").notNull().default(0),
   createdAt: text("created_at").notNull(),
 });
 
@@ -52,6 +56,12 @@ export const bookings = sqliteTable("bookings", {
   status: text("status", { enum: ["pending", "confirmed", "cancelled"] })
     .notNull()
     .default("confirmed"),
+  paymentStatus: text("payment_status", {
+    enum: ["none", "pending", "paid"],
+  })
+    .notNull()
+    .default("none"),
+  stripeSessionId: text("stripe_session_id"),
   createdAt: text("created_at").notNull(),
 });
 

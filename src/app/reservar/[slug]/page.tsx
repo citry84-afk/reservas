@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { AmbientOrbs } from "@/components/ambient-orbs";
 import { BookingFlow } from "@/components/booking-flow";
+import { BookingCancelledNotice } from "@/components/booking-cancelled-notice";
 import { getActiveServices, getProviderBySlug } from "@/lib/actions";
+import { requiresDeposit } from "@/lib/stripe";
 
 function ProviderAvatar({ name }: { name: string }) {
   const initial = name.charAt(0).toUpperCase();
@@ -14,10 +16,13 @@ function ProviderAvatar({ name }: { name: string }) {
 
 export default async function ReservarPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ cancelado?: string }>;
 }) {
   const { slug } = await params;
+  const { cancelado } = await searchParams;
   const provider = await getProviderBySlug(slug);
 
   if (!provider) {
@@ -65,7 +70,12 @@ export default async function ReservarPage({
       </header>
 
       <main className="relative mx-auto max-w-lg px-6 py-10 pb-16">
-        <BookingFlow provider={provider} services={services} />
+        {cancelado && <BookingCancelledNotice />}
+        <BookingFlow
+          provider={provider}
+          services={services}
+          depositRequired={requiresDeposit(provider)}
+        />
       </main>
 
       <footer className="relative border-t bg-background/50 py-4 text-center text-xs text-muted-foreground backdrop-blur-sm">

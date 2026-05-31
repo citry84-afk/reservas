@@ -1,6 +1,6 @@
 "use server";
 
-import { and, asc, eq, gte } from "drizzle-orm";
+import { and, asc, eq, gte, inArray } from "drizzle-orm";
 import { addMinutes } from "date-fns";
 import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
@@ -14,6 +14,10 @@ import {
 } from "@/db/schema";
 import { clearSession, setSession, verifyPassword } from "@/lib/auth";
 import { sendBookingConfirmationEmails } from "@/lib/email";
+import {
+  createCheckoutSession,
+} from "@/lib/booking-payment";
+import { requiresDeposit } from "@/lib/stripe";
 import { formatTime, generateTimeSlots, parseTime } from "@/lib/slots";
 
 export async function loginAction(formData: FormData) {
@@ -91,7 +95,7 @@ export async function getAvailableSlots(
       and(
         eq(bookings.providerId, providerId),
         eq(bookings.date, date),
-        eq(bookings.status, "confirmed")
+        inArray(bookings.status, ["confirmed", "pending"])
       )
     );
 
@@ -155,6 +159,8 @@ export async function createBooking(data: {
   const start = parseTime(data.startTime);
   const end = formatTime(addMinutes(start, service.durationMinutes));
 
+  const needsPayment = requiresDeposit(provider);
+
   const id = nanoid();
   const bookingRow = {
     id,
@@ -167,11 +173,45 @@ export async function createBooking(data: {
     clientEmail: data.clientEmail,
     clientPhone: data.clientPhone ?? null,
     notes: data.notes ?? null,
-    status: "confirmed" as const,
+    status: needsPayment ? ("pending" as const) : ("confirmed" as const),
+    paymentStatus: needsPayment ? ("pending" as const) : ("none" as const),
+    stripeSessionId: null as string | null,
     createdAt: new Date().toISOString(),
   };
 
   await db.insert(bookings).values(bookingRow);
+
+  if (needsPayment) {
+    try {
+      const session = await createCheckoutSession({
+        bookingId: id,
+        booking: bookingRow,
+        service,
+        provider,
+      });
+
+      if (session.id) {
+        await db
+          .update(bookings)
+          .set({ stripeSessionId: session.id })
+          .where(eq(bookings.id, id));
+      }
+
+      revalidatePath("/admin");
+      revalidatePath(`/reservar/${provider.slug}`);
+
+      return {
+        success: true,
+        bookingId: id,
+        checkoutUrl: session.url,
+        requiresPayment: true,
+      };
+    } catch (err) {
+      await db.delete(bookings).where(eq(bookings.id, id));
+      console.error("[stripe] Error creando checkout:", err);
+      return { error: "Error al iniciar el pago. Inténtalo de nuevo." };
+    }
+  }
 
   const emailResult = await sendBookingConfirmationEmails({
     booking: bookingRow,
@@ -186,6 +226,7 @@ export async function createBooking(data: {
     success: true,
     bookingId: id,
     emailSent: emailResult.sent,
+    requiresPayment: false,
   };
 }
 
@@ -222,6 +263,8 @@ export async function setupProvider(data: {
   email: string;
   phone?: string;
   description?: string;
+  depositEnabled?: boolean;
+  depositCents?: number;
 }) {
   const existing = await getProvider();
   if (existing) {
@@ -233,6 +276,8 @@ export async function setupProvider(data: {
         email: data.email,
         phone: data.phone ?? null,
         description: data.description ?? null,
+        depositEnabled: data.depositEnabled ?? false,
+        depositCents: data.depositCents ?? 0,
       })
       .where(eq(providers.id, existing.id));
     revalidatePath("/admin");
@@ -248,6 +293,8 @@ export async function setupProvider(data: {
     phone: data.phone ?? null,
     description: data.description ?? null,
     timezone: "Europe/Madrid",
+    depositEnabled: data.depositEnabled ?? false,
+    depositCents: data.depositCents ?? 0,
     createdAt: new Date().toISOString(),
   });
 

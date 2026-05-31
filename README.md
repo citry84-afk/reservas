@@ -109,10 +109,27 @@ NEXT_PUBLIC_APP_URL=https://reservas-psi.vercel.app
 
 Sin `RESEND_API_KEY` la app funciona igual; simplemente no envía emails.
 
+## Pagos con Stripe (opcional)
+
+Preparado pero **desactivado** hasta que configures las variables. Sin Stripe, las reservas se confirman gratis como ahora.
+
+Cuando quieras activarlo:
+
+1. Crea cuenta en [stripe.com](https://stripe.com)
+2. Añade en Vercel:
+   ```bash
+   STRIPE_SECRET_KEY=sk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...   # endpoint: /api/stripe/webhook
+   NEXT_PUBLIC_APP_URL=https://reservas-psi.vercel.app
+   ```
+3. En el panel → **Perfil** → activa "Cobrar señal al reservar" e indica el importe
+
+Flujo con Stripe activo: el cliente rellena el formulario → paga la señal en Stripe Checkout → reserva confirmada + emails.
+
 ## Próximos pasos (roadmap)
 
 - [x] Notificaciones por email (Resend)
-- [ ] Pagos con Stripe (señal / depósito anti no-show)
+- [x] Pagos con Stripe (señal anti no-show, opcional)
 - [ ] Recordatorios WhatsApp
 - [ ] Videollamadas (Google Meet)
 - [ ] Multi-profesional (varios perfiles)

@@ -2,18 +2,28 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { CreditCard } from "lucide-react";
 import { toast } from "sonner";
+import { AdminCard } from "@/components/admin-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { AdminCard } from "@/components/admin-ui";
 import { setupProvider } from "@/lib/actions";
 import type { Provider } from "@/db/schema";
 
-export function ProviderSetupForm({ provider }: { provider: Provider | null }) {
+export function ProviderSetupForm({
+  provider,
+  stripeConfigured,
+}: {
+  provider: Provider | null;
+  stripeConfigured: boolean;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [depositEnabled, setDepositEnabled] = useState(
+    provider?.depositEnabled ?? false
+  );
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,12 +36,18 @@ export function ProviderSetupForm({ provider }: { provider: Provider | null }) {
       .replace(/[^a-z0-9-]/g, "-")
       .replace(/-+/g, "-");
 
+    const depositCents = Math.round(
+      parseFloat((form.get("deposit") as string) || "0") * 100
+    );
+
     await setupProvider({
       name,
       slug,
       email: form.get("email") as string,
       phone: (form.get("phone") as string) || undefined,
       description: (form.get("description") as string) || undefined,
+      depositEnabled: stripeConfigured && form.get("depositEnabled") === "on",
+      depositCents: stripeConfigured ? depositCents : 0,
     });
 
     toast.success("Perfil guardado");
@@ -40,9 +56,15 @@ export function ProviderSetupForm({ provider }: { provider: Provider | null }) {
     router.push("/admin/dashboard");
   }
 
+  const defaultDeposit = provider?.depositCents
+    ? (provider.depositCents / 100).toFixed(2)
+    : "20";
+
   return (
-    <AdminCard className="p-6">
-      <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <AdminCard className="p-6">
+        <h3 className="mb-4 font-medium">Datos profesionales</h3>
+        <div className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="name">Nombre profesional *</Label>
             <Input
@@ -99,11 +121,68 @@ export function ProviderSetupForm({ provider }: { provider: Provider | null }) {
               placeholder="Breve descripción de tus servicios..."
             />
           </div>
+        </div>
+      </AdminCard>
 
-          <Button type="submit" disabled={loading} className="rounded-full">
-            {loading ? "Guardando..." : "Guardar perfil"}
-          </Button>
-        </form>
-    </AdminCard>
+      <AdminCard className="p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <CreditCard className="size-5" />
+          <h3 className="font-medium">Señal anti no-show</h3>
+        </div>
+
+        {stripeConfigured ? (
+          <div className="space-y-4">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                name="depositEnabled"
+                checked={depositEnabled}
+                onChange={(e) => setDepositEnabled(e.target.checked)}
+                className="mt-1 size-4 rounded border"
+              />
+              <div>
+                <p className="text-sm font-medium">
+                  Cobrar señal al reservar
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  El cliente paga una señal con Stripe antes de confirmar la
+                  cita.
+                </p>
+              </div>
+            </label>
+
+            {depositEnabled && (
+              <div className="space-y-2">
+                <Label htmlFor="deposit">Importe de la señal (€)</Label>
+                <Input
+                  id="deposit"
+                  name="deposit"
+                  type="number"
+                  min={1}
+                  step={0.01}
+                  defaultValue={defaultDeposit}
+                  className="max-w-[140px]"
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-xl bg-muted/50 p-4 text-sm text-muted-foreground">
+            <p>
+              Stripe no está configurado. Las reservas son gratuitas por ahora.
+            </p>
+            <p className="mt-2">
+              Cuando añadas{" "}
+              <code className="rounded bg-muted px-1">STRIPE_SECRET_KEY</code> en
+              Vercel, podrás activar la señal aquí.
+            </p>
+          </div>
+        )}
+      </AdminCard>
+
+      <Button type="submit" disabled={loading} className="rounded-full">
+        {loading ? "Guardando..." : "Guardar perfil"}
+      </Button>
+    </form>
   );
 }

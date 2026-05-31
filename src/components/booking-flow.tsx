@@ -26,9 +26,11 @@ type Step = "service" | "datetime" | "details" | "done";
 export function BookingFlow({
   provider,
   services,
+  depositRequired,
 }: {
   provider: Provider;
   services: Service[];
+  depositRequired: boolean;
 }) {
   const [step, setStep] = useState<Step>("service");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -78,6 +80,11 @@ export function BookingFlow({
 
     if (result.error) {
       toast.error(result.error);
+      return;
+    }
+
+    if (result.checkoutUrl) {
+      window.location.href = result.checkoutUrl;
       return;
     }
 
@@ -277,6 +284,14 @@ export function BookingFlow({
                   {formatDateSpanish(format(selectedDate, "yyyy-MM-dd"))} ·{" "}
                   {selectedTime}
                 </p>
+                {depositRequired && provider.depositCents > 0 && (
+                  <p className="mt-2 border-t pt-2 text-muted-foreground">
+                    Señal a pagar ahora:{" "}
+                    <span className="font-medium text-foreground">
+                      {formatPrice(provider.depositCents)}
+                    </span>
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -318,7 +333,11 @@ export function BookingFlow({
           </Card>
 
           <Button type="submit" className="w-full rounded-full" disabled={submitting}>
-            {submitting ? "Confirmando..." : "Confirmar reserva"}
+            {submitting
+              ? "Procesando..."
+              : depositRequired && provider.depositCents > 0
+                ? `Pagar señal ${formatPrice(provider.depositCents)}`
+                : "Confirmar reserva"}
           </Button>
         </form>
       )}
