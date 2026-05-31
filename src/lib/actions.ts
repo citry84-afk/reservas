@@ -13,6 +13,7 @@ import {
   services,
 } from "@/db/schema";
 import { clearSession, setSession, verifyPassword } from "@/lib/auth";
+import { sendBookingConfirmationEmails } from "@/lib/email";
 import { formatTime, generateTimeSlots, parseTime } from "@/lib/slots";
 
 export async function loginAction(formData: FormData) {
@@ -141,11 +142,21 @@ export async function createBooking(data: {
     return { error: "Este horario ya no está disponible" };
   }
 
+  const [provider] = await db
+    .select()
+    .from(providers)
+    .where(eq(providers.id, data.providerId))
+    .limit(1);
+
+  if (!provider) {
+    return { error: "Profesional no encontrado" };
+  }
+
   const start = parseTime(data.startTime);
   const end = formatTime(addMinutes(start, service.durationMinutes));
 
   const id = nanoid();
-  await db.insert(bookings).values({
+  const bookingRow = {
     id,
     providerId: data.providerId,
     serviceId: data.serviceId,
@@ -156,14 +167,26 @@ export async function createBooking(data: {
     clientEmail: data.clientEmail,
     clientPhone: data.clientPhone ?? null,
     notes: data.notes ?? null,
-    status: "confirmed",
+    status: "confirmed" as const,
     createdAt: new Date().toISOString(),
+  };
+
+  await db.insert(bookings).values(bookingRow);
+
+  const emailResult = await sendBookingConfirmationEmails({
+    booking: bookingRow,
+    service,
+    provider,
   });
 
   revalidatePath("/admin");
-  revalidatePath(`/reservar/${(await getProvider())?.slug}`);
+  revalidatePath(`/reservar/${provider.slug}`);
 
-  return { success: true, bookingId: id };
+  return {
+    success: true,
+    bookingId: id,
+    emailSent: emailResult.sent,
+  };
 }
 
 export async function getUpcomingBookings(providerId: string) {

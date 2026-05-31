@@ -38,6 +38,7 @@ export function BookingFlow({
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
 
   async function handleDateSelect(date: Date | undefined) {
     setSelectedDate(date);
@@ -81,6 +82,7 @@ export function BookingFlow({
     }
 
     setBookingId(result.bookingId ?? null);
+    setEmailSent(result.emailSent ?? false);
     setStep("done");
   }
 
@@ -108,6 +110,11 @@ export function BookingFlow({
             {bookingId && (
               <p className="mt-4 text-xs text-muted-foreground">
                 Referencia: {bookingId.slice(0, 8).toUpperCase()}
+              </p>
+            )}
+            {emailSent && (
+              <p className="mt-3 text-sm text-muted-foreground">
+                Te hemos enviado un email de confirmación.
               </p>
             )}
           </CardContent>

@@ -87,10 +87,32 @@ Luego configura tu perfil en `/admin/configuracion`.
 
 Netlify también soporta Next.js. Conecta el mismo repo y configura las mismas variables de entorno. Vercel es la opción recomendada por integración nativa con Next.js.
 
+## Emails de confirmación
+
+Al confirmar una reserva se envían dos emails (via [Resend](https://resend.com)):
+
+- **Cliente** — confirmación con fecha, hora y referencia
+- **Profesional** — notificación con datos del cliente y enlace al panel
+
+### Configurar Resend
+
+1. Crea cuenta en [resend.com](https://resend.com) y genera una API key
+2. Añade las variables de entorno:
+
+```bash
+RESEND_API_KEY=re_xxxxxxxx
+EMAIL_FROM=ReservaYa <onboarding@resend.dev>   # dominio de prueba
+NEXT_PUBLIC_APP_URL=https://reservas-psi.vercel.app
+```
+
+3. En producción, verifica tu dominio en Resend y usa `EMAIL_FROM=ReservaYa <reservas@tudominio.com>`
+
+Sin `RESEND_API_KEY` la app funciona igual; simplemente no envía emails.
+
 ## Próximos pasos (roadmap)
 
+- [x] Notificaciones por email (Resend)
 - [ ] Pagos con Stripe (señal / depósito anti no-show)
-- [ ] Notificaciones por email (Resend)
 - [ ] Recordatorios WhatsApp
 - [ ] Videollamadas (Google Meet)
 - [ ] Multi-profesional (varios perfiles)
