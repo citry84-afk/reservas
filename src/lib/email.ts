@@ -133,7 +133,7 @@ export async function sendBookingConfirmationEmails(
 ): Promise<{ sent: boolean; error?: string }> {
   if (!resend) {
     console.warn(
-      "[email] RESEND_API_KEY no configurada — emails omitidos"
+      "[email] RESEND_API_KEY (o resend) no configurada — emails omitidos"
     );
     return { sent: false, error: "Email no configurado" };
   }
@@ -178,5 +178,5 @@ export async function sendBookingConfirmationEmails(
 }
 
 export function isEmailConfigured(): boolean {
-  return !!process.env.RESEND_API_KEY;
+  return !!(process.env.RESEND_API_KEY ?? process.env.resend);
 }

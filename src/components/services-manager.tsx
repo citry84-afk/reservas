@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { deleteService, upsertService } from "@/lib/actions";
+import { AdminCard, AdminEmptyState } from "@/components/admin-ui";
 import { formatPrice } from "@/lib/slots";
 import type { Service } from "@/db/schema";
 
@@ -62,7 +62,7 @@ export function ServicesManager({
       <div className="flex justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="rounded-full">
               <Plus className="mr-2 size-4" />
               Nuevo servicio
             </Button>
@@ -106,7 +106,7 @@ export function ServicesManager({
                   />
                 </div>
               </div>
-              <Button type="submit" disabled={loading} className="w-full">
+              <Button type="submit" disabled={loading} className="w-full rounded-full">
                 {loading ? "Guardando..." : "Crear servicio"}
               </Button>
             </form>
@@ -115,36 +115,38 @@ export function ServicesManager({
       </div>
 
       {services.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            Aún no tienes servicios. Crea el primero para empezar a recibir reservas.
-          </CardContent>
-        </Card>
+        <AdminEmptyState
+          title="Sin servicios todavía"
+          description="Crea tu primer servicio para empezar a recibir reservas."
+        />
       ) : (
         services.map((service) => (
-          <Card key={service.id}>
-            <CardHeader className="flex flex-row items-start justify-between">
+          <AdminCard key={service.id} className="p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-foreground/5">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <CardTitle className="text-base">{service.name}</CardTitle>
+                <p className="font-medium">{service.name}</p>
                 {service.description && (
                   <p className="mt-1 text-sm text-muted-foreground">
                     {service.description}
                   </p>
                 )}
+                <div className="mt-3 flex gap-4 text-sm text-muted-foreground">
+                  <span>{service.durationMinutes} min</span>
+                  <span className="font-medium text-foreground">
+                    {formatPrice(service.priceCents)}
+                  </span>
+                </div>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
+                className="shrink-0 rounded-full"
                 onClick={() => handleDelete(service.id)}
               >
                 <Trash2 className="size-4 text-destructive" />
               </Button>
-            </CardHeader>
-            <CardContent className="flex gap-4 text-sm text-muted-foreground">
-              <span>{service.durationMinutes} min</span>
-              <span>{formatPrice(service.priceCents)}</span>
-            </CardContent>
-          </Card>
+            </div>
+          </AdminCard>
         ))
       )}
     </div>

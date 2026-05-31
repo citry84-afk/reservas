@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { AdminNav } from "@/components/admin-nav";
+import { AdminShell } from "@/components/admin-shell";
+import { AdminPageHeader } from "@/components/admin-ui";
 import { ProviderSetupForm } from "@/components/provider-setup-form";
 import { isAuthenticated } from "@/lib/auth";
 import { getProvider } from "@/lib/actions";
@@ -11,14 +12,15 @@ export default async function ConfigPage() {
   const provider = await getProvider();
 
   return (
-    <div className="min-h-screen bg-muted/20">
-      <AdminNav
-        bookingUrl={provider ? `/reservar/${provider.slug}` : undefined}
+    <AdminShell
+      bookingUrl={provider ? `/reservar/${provider.slug}` : undefined}
+      providerName={provider?.name}
+    >
+      <AdminPageHeader
+        title="Perfil"
+        description="Tu nombre, enlace público y datos de contacto."
       />
-      <main className="mx-auto max-w-xl px-6 py-8">
-        <h1 className="mb-6 text-2xl font-semibold">Configuración</h1>
-        <ProviderSetupForm provider={provider} />
-      </main>
-    </div>
+      <ProviderSetupForm provider={provider} />
+    </AdminShell>
   );
 }

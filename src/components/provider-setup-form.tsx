@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AdminCard } from "@/components/admin-ui";
 import { setupProvider } from "@/lib/actions";
 import type { Provider } from "@/db/schema";
 
@@ -41,12 +41,8 @@ export function ProviderSetupForm({ provider }: { provider: Provider | null }) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Tu perfil profesional</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <AdminCard className="p-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="name">Nombre profesional *</Label>
             <Input
@@ -104,11 +100,10 @@ export function ProviderSetupForm({ provider }: { provider: Provider | null }) {
             />
           </div>
 
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} className="rounded-full">
             {loading ? "Guardando..." : "Guardar perfil"}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+    </AdminCard>
   );
 }

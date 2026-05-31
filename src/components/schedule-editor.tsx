@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { setAvailability } from "@/lib/actions";
+import { AdminCard } from "@/components/admin-ui";
 import { DAY_NAMES } from "@/lib/slots";
 import type { Availability } from "@/db/schema";
 
@@ -64,20 +64,22 @@ export function ScheduleEditor({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Disponibilidad semanal</CardTitle>
-        <p className="text-sm text-muted-foreground">
+    <AdminCard className="p-6">
+      <div className="mb-6">
+        <h3 className="font-medium">Disponibilidad semanal</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
           Marca los días en los que aceptas reservas y define el horario.
         </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </div>
+      <div className="space-y-3">
         {[1, 2, 3, 4, 5, 6, 0].map((day) => {
           const active = !!schedule[day];
           return (
             <div
               key={day}
-              className="flex flex-wrap items-center gap-4 rounded-lg border p-4"
+              className={`flex flex-wrap items-center gap-4 rounded-xl border p-4 transition-colors ${
+                active ? "border-foreground/15 bg-muted/30" : "border-transparent bg-muted/10"
+              }`}
             >
               <label className="flex min-w-32 cursor-pointer items-center gap-2">
                 <input
@@ -120,10 +122,10 @@ export function ScheduleEditor({
           );
         })}
 
-        <Button onClick={handleSave} disabled={loading}>
+        <Button onClick={handleSave} disabled={loading} className="mt-4 rounded-full">
           {loading ? "Guardando..." : "Guardar horario"}
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </AdminCard>
   );
 }

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { AdminNav } from "@/components/admin-nav";
+import { AdminShell } from "@/components/admin-shell";
+import { AdminPageHeader } from "@/components/admin-ui";
 import { ServicesManager } from "@/components/services-manager";
 import { isAuthenticated } from "@/lib/auth";
 import { getAllServices, getProvider } from "@/lib/actions";
@@ -14,12 +15,15 @@ export default async function ServiciosPage() {
   const services = await getAllServices(provider.id);
 
   return (
-    <div className="min-h-screen bg-muted/20">
-      <AdminNav bookingUrl={`/reservar/${provider.slug}`} />
-      <main className="mx-auto max-w-2xl px-6 py-8">
-        <h1 className="mb-6 text-2xl font-semibold">Servicios</h1>
-        <ServicesManager providerId={provider.id} services={services} />
-      </main>
-    </div>
+    <AdminShell
+      bookingUrl={`/reservar/${provider.slug}`}
+      providerName={provider.name}
+    >
+      <AdminPageHeader
+        title="Servicios"
+        description="Define qué ofreces, cuánto dura y cuánto cuesta."
+      />
+      <ServicesManager providerId={provider.id} services={services} />
+    </AdminShell>
   );
 }
