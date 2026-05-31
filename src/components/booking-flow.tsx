@@ -86,39 +86,47 @@ export function BookingFlow({
 
   if (step === "done" && selectedService && selectedDate && selectedTime) {
     return (
-      <Card className="mx-auto max-w-md">
-        <CardContent className="flex flex-col items-center py-12 text-center">
-          <CheckCircle2 className="mb-4 size-12 text-green-600" />
-          <h2 className="text-xl font-semibold">¡Reserva confirmada!</h2>
-          <p className="mt-2 text-muted-foreground">
-            {selectedService.name} con {provider.name}
-          </p>
-          <p className="mt-4 font-medium">
-            {formatDateSpanish(format(selectedDate, "yyyy-MM-dd"))}
-          </p>
-          <p className="text-lg">{selectedTime}</p>
-          {bookingId && (
-            <p className="mt-4 text-xs text-muted-foreground">
-              Referencia: {bookingId.slice(0, 8)}
+      <div className="booking-step-enter mx-auto max-w-md">
+        <Card className="overflow-hidden border-0 bg-background/80 shadow-2xl shadow-foreground/10 backdrop-blur-xl">
+          <div className="h-1 w-full bg-gradient-to-r from-green-400 via-emerald-500 to-green-600" />
+          <CardContent className="flex flex-col items-center py-12 text-center">
+            <div className="booking-success-pop mb-5 flex size-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-950">
+              <CheckCircle2 className="size-8 text-green-600 dark:text-green-400" />
+            </div>
+            <h2 className="text-xl font-semibold">¡Reserva confirmada!</h2>
+            <p className="mt-2 text-muted-foreground">
+              {selectedService.name} con {provider.name}
             </p>
-          )}
-        </CardContent>
-      </Card>
+            <div className="mt-6 w-full rounded-xl bg-muted/50 p-4">
+              <p className="font-medium">
+                {formatDateSpanish(format(selectedDate, "yyyy-MM-dd"))}
+              </p>
+              <p className="mt-1 text-2xl font-semibold tracking-tight">
+                {selectedTime}
+              </p>
+            </div>
+            {bookingId && (
+              <p className="mt-4 text-xs text-muted-foreground">
+                Referencia: {bookingId.slice(0, 8).toUpperCase()}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
+    <div className="space-y-8">
       <StepIndicator
-        current={
-          step === "service" ? 1 : step === "datetime" ? 2 : 3
-        }
+        current={step === "service" ? 1 : step === "datetime" ? 2 : 3}
       />
 
+      <div key={step} className="booking-step-enter space-y-6">
       {step === "service" && (
         <div className="space-y-3">
           <h2 className="text-lg font-medium">Elige un servicio</h2>
-          {services.map((service) => (
+          {services.map((service, i) => (
             <button
               key={service.id}
               type="button"
@@ -126,7 +134,8 @@ export function BookingFlow({
                 setSelectedService(service);
                 setStep("datetime");
               }}
-              className="w-full rounded-xl border bg-card p-4 text-left transition-colors hover:border-primary/50 hover:bg-accent/50"
+              className="booking-step-enter w-full rounded-2xl border bg-background/80 p-4 text-left shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-lg hover:shadow-foreground/5"
+              style={{ animationDelay: `${i * 60}ms` }}
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -162,7 +171,7 @@ export function BookingFlow({
             </Button>
           </div>
 
-          <Card>
+          <Card className="border-0 bg-background/80 shadow-lg shadow-foreground/5 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-base">{selectedService.name}</CardTitle>
             </CardHeader>
@@ -230,7 +239,7 @@ export function BookingFlow({
           </Card>
 
           <Button
-            className="w-full"
+            className="w-full rounded-full"
             disabled={!selectedDate || !selectedTime}
             onClick={() => setStep("details")}
           >
@@ -253,7 +262,7 @@ export function BookingFlow({
             </Button>
           </div>
 
-          <Card>
+          <Card className="border-0 bg-background/80 shadow-lg shadow-foreground/5 backdrop-blur-sm">
             <CardContent className="space-y-4 pt-6">
               <div className="rounded-lg bg-muted/50 p-3 text-sm">
                 <p className="font-medium">{selectedService.name}</p>
@@ -301,44 +310,43 @@ export function BookingFlow({
             </CardContent>
           </Card>
 
-          <Button type="submit" className="w-full" disabled={submitting}>
+          <Button type="submit" className="w-full rounded-full" disabled={submitting}>
             {submitting ? "Confirmando..." : "Confirmar reserva"}
           </Button>
         </form>
       )}
+      </div>
     </div>
   );
 }
 
 function StepIndicator({ current }: { current: number }) {
   const steps = ["Servicio", "Fecha", "Datos"];
+  const progress = ((current - 1) / (steps.length - 1)) * 100;
+
   return (
-    <div className="flex items-center justify-center gap-2">
-      {steps.map((label, i) => (
-        <div key={label} className="flex items-center gap-2">
-          <div
-            className={cn(
-              "flex size-7 items-center justify-center rounded-full text-xs font-medium",
-              i + 1 <= current
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
-            )}
-          >
-            {i + 1}
-          </div>
+    <div className="space-y-3">
+      <div className="relative h-1 overflow-hidden rounded-full bg-muted">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full bg-foreground transition-all duration-500 ease-out"
+          style={{ width: `${Math.max(progress, 8)}%` }}
+        />
+      </div>
+      <div className="flex justify-between">
+        {steps.map((label, i) => (
           <span
+            key={label}
             className={cn(
-              "hidden text-sm sm:inline",
-              i + 1 <= current ? "font-medium" : "text-muted-foreground"
+              "text-xs transition-colors duration-300",
+              i + 1 <= current
+                ? "font-medium text-foreground"
+                : "text-muted-foreground"
             )}
           >
             {label}
           </span>
-          {i < steps.length - 1 && (
-            <div className="mx-1 h-px w-6 bg-border sm:w-10" />
-          )}
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

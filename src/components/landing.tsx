@@ -3,18 +3,15 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { Calendar, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AmbientOrbs } from "@/components/ambient-orbs";
 import { FadeIn } from "@/components/fade-in";
+import { Button } from "@/components/ui/button";
 
 export function LandingHero() {
   return (
     <section className="relative overflow-hidden">
-      {/* Ambient gradient orbs */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="landing-orb landing-orb-1" />
-        <div className="landing-orb landing-orb-2" />
-        <div className="landing-orb landing-orb-3" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,var(--background)_72%)]" />
+        <AmbientOrbs />
       </div>
 
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:gap-16 lg:py-28">

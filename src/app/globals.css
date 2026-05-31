@@ -231,9 +231,44 @@
   .landing-float,
   .landing-float-delayed,
   .landing-float-reverse,
-  .landing-orb {
+  .landing-orb,
+  .booking-step-enter,
+  .booking-success-pop {
     animation: none;
     opacity: 1;
     transform: none;
   }
+}
+
+@keyframes booking-step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes booking-success-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.booking-step-enter {
+  animation: booking-step-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.booking-success-pop {
+  animation: booking-success-pop 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
