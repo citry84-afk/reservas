@@ -140,14 +140,49 @@ Para probar manualmente:
 curl -H "Authorization: Bearer TU_CRON_SECRET" https://reservas-psi.vercel.app/api/cron/reminders
 ```
 
-## Próximos pasos (roadmap)
+## Multi-profesional
+
+Varios profesionales pueden usar la misma plataforma:
+
+- **Registro**: `/admin/registro` — cada uno crea su perfil y URL (`/reservar/tu-nombre`)
+- **Directorio público**: `/profesionales` — listado de todos los profesionales
+- **Selector de perfil**: si hay varias agendas, al entrar eliges cuál gestionar
+
+Todos comparten la contraseña de plataforma (`ADMIN_PASSWORD`). Cada profesional solo ve sus reservas, servicios y horario.
+
+## WhatsApp (opcional)
+
+**Sin configurar:** botón de WhatsApp en emails de confirmación (enlace wa.me al número del profesional).
+
+**Con Twilio** (mensajes automáticos al reservar y en recordatorios):
+```bash
+TWILIO_ACCOUNT_SID=AC...
+TWILIO_AUTH_TOKEN=...
+TWILIO_WHATSAPP_FROM=+14155238886   # sandbox o número aprobado
+```
+
+Añade el WhatsApp del profesional en **Perfil**. Si el cliente deja teléfono, recibe mensaje automático (requiere Twilio).
+
+## Dominio propio
+
+1. En Vercel → **Settings → Domains** → añade `tudominio.com`
+2. Configura los DNS según indique Vercel (A/CNAME)
+3. Añade la variable:
+   ```bash
+   NEXT_PUBLIC_APP_URL=https://tudominio.com
+   ```
+4. Redeploy
+
+Los emails, Stripe y WhatsApp usarán automáticamente tu dominio.
+
+## Roadmap
 
 - [x] Notificaciones por email (Resend)
-- [x] Pagos con Stripe (señal anti no-show, opcional)
-- [x] Recordatorios automáticos antes de la cita
-- [ ] Recordatorios WhatsApp
+- [x] Pagos con Stripe (opcional)
+- [x] Recordatorios automáticos
+- [x] Multi-profesional
+- [x] WhatsApp (wa.me + Twilio preparado)
 - [ ] Videollamadas (Google Meet)
-- [ ] Multi-profesional (varios perfiles)
 
 ## Licencia
 

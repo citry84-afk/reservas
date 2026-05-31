@@ -12,9 +12,14 @@ export default function HomePage() {
             <Calendar className="size-6" />
             <span className="text-lg font-semibold tracking-tight">ReservaYa</span>
           </div>
-          <Button variant="ghost" asChild>
-            <Link href="/admin">Para profesionales</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/profesionales">Profesionales</Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link href="/admin">Para profesionales</Link>
+            </Button>
+          </div>
         </div>
       </header>
 

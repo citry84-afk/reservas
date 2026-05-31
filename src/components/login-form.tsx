@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { loginAction } from "@/lib/actions";
 
 export function LoginForm() {
@@ -26,7 +27,7 @@ export function LoginForm() {
       return;
     }
 
-    router.push("/admin/dashboard");
+    router.push(result?.redirect ?? "/admin/dashboard");
     router.refresh();
   }
 

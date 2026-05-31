@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { formatDateSpanish, formatPrice } from "@/lib/slots";
+import { whatsAppLink } from "@/lib/whatsapp";
 import type { Booking, Provider, Service } from "@/db/schema";
 
 const apiKey = process.env.RESEND_API_KEY ?? process.env.resend;
@@ -28,7 +29,7 @@ type BookingEmailData = {
     | "notes"
   >;
   service: Pick<Service, "name" | "durationMinutes" | "priceCents">;
-  provider: Pick<Provider, "name" | "email" | "phone" | "slug">;
+  provider: Pick<Provider, "name" | "email" | "phone" | "whatsapp" | "slug">;
 };
 
 function emailLayout(content: string) {
@@ -89,6 +90,17 @@ function bookingDetailsTable(data: BookingEmailData) {
 
 function clientConfirmationEmail(data: BookingEmailData) {
   const { provider } = data;
+  const contact = provider.whatsapp ?? provider.phone;
+  const waBlock = contact
+    ? `<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px;">
+        <tr><td align="center">
+          <a href="${whatsAppLink(contact, `Hola ${provider.name}, tengo una consulta sobre mi reserva`)}" style="display:inline-block;background:#25D366;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:980px;font-size:14px;font-weight:500;">
+            WhatsApp
+          </a>
+        </td></tr>
+      </table>`
+    : "";
+
   return emailLayout(`
     <h1 style="margin:0 0 8px;font-size:22px;font-weight:600;color:#1d1d1f;text-align:center;">
       ¡Reserva confirmada!
@@ -98,8 +110,9 @@ function clientConfirmationEmail(data: BookingEmailData) {
     </p>
     ${bookingDetailsTable(data)}
     <p style="margin:24px 0 0;font-size:13px;color:#86868b;text-align:center;line-height:1.6;">
-      Si necesitas cancelar o modificar tu cita, contacta directamente con ${provider.name}${provider.phone ? ` al ${provider.phone}` : ""}.
+      Si necesitas cancelar o modificar tu cita, contacta directamente con ${provider.name}${contact ? ` (${contact})` : ""}.
     </p>
+    ${waBlock}
   `);
 }
 

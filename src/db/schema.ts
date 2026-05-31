@@ -7,6 +7,7 @@ export const providers = sqliteTable("providers", {
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
+  whatsapp: text("whatsapp"),
   description: text("description"),
   timezone: text("timezone").notNull().default("Europe/Madrid"),
   depositEnabled: integer("deposit_enabled", { mode: "boolean" })

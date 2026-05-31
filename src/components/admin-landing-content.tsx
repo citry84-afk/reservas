@@ -17,7 +17,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export function AdminLandingContent({ authed }: { authed: boolean }) {
   const ctaHref = authed ? "/admin/dashboard" : "/admin/login";
-  const startHref = authed ? "/admin/configuracion" : "/admin/login";
+  const startHref = authed ? "/admin/configuracion" : "/admin/registro";
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -67,7 +67,7 @@ export function AdminLandingContent({ authed }: { authed: boolean }) {
             >
               <Button size="lg" className="rounded-full px-8" asChild>
                 <Link href={startHref}>
-                  {authed ? "Configurar mi perfil" : "Empezar gratis"}
+                  {authed ? "Configurar mi perfil" : "Crear mi agenda"}
                   <ArrowRight className="ml-2 size-4" />
                 </Link>
               </Button>

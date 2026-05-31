@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings, providers, services } from "@/db/schema";
-import { sendBookingConfirmationEmails } from "@/lib/email";
+import { notifyBookingConfirmed } from "@/lib/notifications";
 import { formatDateSpanish } from "@/lib/slots";
 import { getAppUrl, getStripe, isStripeConfigured } from "@/lib/stripe";
 import type { Booking, Provider, Service } from "@/db/schema";
@@ -79,7 +79,7 @@ export async function confirmBookingPayment(
     })
     .where(eq(bookings.id, bookingId));
 
-  await sendBookingConfirmationEmails({
+  await notifyBookingConfirmed({
     booking: row.booking,
     service: row.service,
     provider: row.provider,

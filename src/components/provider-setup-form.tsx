@@ -40,15 +40,22 @@ export function ProviderSetupForm({
       parseFloat((form.get("deposit") as string) || "0") * 100
     );
 
-    await setupProvider({
+    const result = await setupProvider({
       name,
       slug,
       email: form.get("email") as string,
       phone: (form.get("phone") as string) || undefined,
+      whatsapp: (form.get("whatsapp") as string) || undefined,
       description: (form.get("description") as string) || undefined,
       depositEnabled: stripeConfigured && form.get("depositEnabled") === "on",
       depositCents: stripeConfigured ? depositCents : 0,
     });
+
+    if (result && "error" in result && result.error) {
+      toast.error(result.error);
+      setLoading(false);
+      return;
+    }
 
     toast.success("Perfil guardado");
     setLoading(false);
@@ -108,7 +115,21 @@ export function ProviderSetupForm({
               id="phone"
               name="phone"
               defaultValue={provider?.phone ?? ""}
+              placeholder="+34 600 000 000"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="whatsapp">WhatsApp</Label>
+            <Input
+              id="whatsapp"
+              name="whatsapp"
+              defaultValue={provider?.whatsapp ?? provider?.phone ?? ""}
+              placeholder="+34 600 000 000"
+            />
+            <p className="text-xs text-muted-foreground">
+              Los clientes podrán contactarte por WhatsApp desde los emails.
+            </p>
           </div>
 
           <div className="space-y-2">

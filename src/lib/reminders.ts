@@ -4,8 +4,8 @@ import { db } from "@/db";
 import { bookings, providers, services } from "@/db/schema";
 import {
   isEmailConfigured,
-  sendBookingReminderEmails,
 } from "@/lib/email";
+import { notifyBookingReminder } from "@/lib/notifications";
 
 /** Fecha de mañana en yyyy-MM-dd (zona Europe/Madrid por defecto en servidor Vercel UTC — usamos fecha local del cron) */
 function getTomorrowDateString(): string {
@@ -40,7 +40,7 @@ export async function processBookingReminders() {
   let failed = 0;
 
   for (const row of rows) {
-    const result = await sendBookingReminderEmails({
+    const result = await notifyBookingReminder({
       booking: row.booking,
       service: row.service,
       provider: row.provider,
