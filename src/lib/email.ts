@@ -128,6 +128,99 @@ function providerNotificationEmail(data: BookingEmailData) {
   `);
 }
 
+function clientReminderEmail(data: BookingEmailData) {
+  const { provider, booking, service } = data;
+  const dateFormatted = formatDateSpanish(booking.date);
+
+  return emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:600;color:#1d1d1f;text-align:center;">
+      Recordatorio de cita
+    </h1>
+    <p style="margin:0;font-size:15px;color:#86868b;text-align:center;line-height:1.5;">
+      Hola ${booking.clientName}, te recordamos tu cita de <strong style="color:#1d1d1f;">mañana</strong> con ${provider.name}.
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;border-radius:12px;padding:16px;margin:24px 0;text-align:center;">
+      <tr><td style="font-size:13px;color:#86868b;">${dateFormatted}</td></tr>
+      <tr><td style="font-size:28px;font-weight:600;color:#1d1d1f;padding:8px 0;">${booking.startTime}</td></tr>
+      <tr><td style="font-size:14px;color:#1d1d1f;">${service.name}</td></tr>
+    </table>
+    <p style="margin:0;font-size:13px;color:#86868b;text-align:center;line-height:1.6;">
+      Si no puedes asistir, contacta con ${provider.name}${provider.phone ? ` (${provider.phone})` : ""} lo antes posible.
+    </p>
+  `);
+}
+
+function providerReminderEmail(data: BookingEmailData) {
+  const { booking, service, provider } = data;
+  const dateFormatted = formatDateSpanish(booking.date);
+  const dashboardUrl = `${appUrl}/admin/dashboard`;
+
+  return emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:600;color:#1d1d1f;text-align:center;">
+      Cita mañana
+    </h1>
+    <p style="margin:0;font-size:15px;color:#86868b;text-align:center;line-height:1.5;">
+      Tienes una cita mañana con <strong style="color:#1d1d1f;">${booking.clientName}</strong>.
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;border-radius:12px;padding:16px;margin:24px 0;text-align:center;">
+      <tr><td style="font-size:13px;color:#86868b;">${dateFormatted}</td></tr>
+      <tr><td style="font-size:28px;font-weight:600;color:#1d1d1f;padding:8px 0;">${booking.startTime}</td></tr>
+      <tr><td style="font-size:14px;color:#1d1d1f;">${service.name}</td></tr>
+      <tr><td style="font-size:13px;color:#86868b;padding-top:8px;">${booking.clientEmail}${booking.clientPhone ? ` · ${booking.clientPhone}` : ""}</td></tr>
+    </table>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px;">
+      <tr><td align="center">
+        <a href="${dashboardUrl}" style="display:inline-block;background:#1d1d1f;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:980px;font-size:14px;font-weight:500;">
+          Ver agenda
+        </a>
+      </td></tr>
+    </table>
+  `);
+}
+
+export async function sendBookingReminderEmails(
+  data: BookingEmailData
+): Promise<{ sent: boolean; error?: string }> {
+  if (!resend) {
+    return { sent: false, error: "Email no configurado" };
+  }
+
+  const dateFormatted = formatDateSpanish(data.booking.date);
+
+  try {
+    const [clientResult, providerResult] = await Promise.all([
+      resend.emails.send({
+        from: fromEmail,
+        to: data.booking.clientEmail,
+        subject: `Recordatorio: cita mañana con ${data.provider.name} — ${dateFormatted}`,
+        html: clientReminderEmail(data),
+      }),
+      resend.emails.send({
+        from: fromEmail,
+        to: data.provider.email,
+        subject: `Mañana: ${data.booking.clientName} — ${dateFormatted} ${data.booking.startTime}`,
+        html: providerReminderEmail(data),
+      }),
+    ]);
+
+    const hasError = clientResult.error || providerResult.error;
+    if (clientResult.error) {
+      console.error("[email] Error recordatorio cliente:", clientResult.error);
+    }
+    if (providerResult.error) {
+      console.error("[email] Error recordatorio profesional:", providerResult.error);
+    }
+
+    return {
+      sent: !hasError,
+      error: hasError ? "Error parcial al enviar recordatorios" : undefined,
+    };
+  } catch (err) {
+    console.error("[email] Error recordatorio:", err);
+    return { sent: false, error: "Error al enviar recordatorios" };
+  }
+}
+
 export async function sendBookingConfirmationEmails(
   data: BookingEmailData
 ): Promise<{ sent: boolean; error?: string }> {

@@ -62,6 +62,7 @@ export const bookings = sqliteTable("bookings", {
     .notNull()
     .default("none"),
   stripeSessionId: text("stripe_session_id"),
+  reminderSentAt: text("reminder_sent_at"),
   createdAt: text("created_at").notNull(),
 });
 

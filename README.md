@@ -126,10 +126,25 @@ Cuando quieras activarlo:
 
 Flujo con Stripe activo: el cliente rellena el formulario → paga la señal en Stripe Checkout → reserva confirmada + emails.
 
+## Recordatorios automáticos
+
+Cada día a las **8:00 UTC** (9:00 hora peninsular en invierno) se envían emails de recordatorio para las citas del **día siguiente**:
+
+- **Cliente** — fecha, hora y contacto del profesional
+- **Profesional** — datos del cliente y enlace al panel
+
+Requiere Resend configurado. Vercel ejecuta el cron automáticamente (`vercel.json`). En producción, Vercel inyecta `CRON_SECRET` — no hace falta configurarlo manualmente.
+
+Para probar manualmente:
+```bash
+curl -H "Authorization: Bearer TU_CRON_SECRET" https://reservas-psi.vercel.app/api/cron/reminders
+```
+
 ## Próximos pasos (roadmap)
 
 - [x] Notificaciones por email (Resend)
 - [x] Pagos con Stripe (señal anti no-show, opcional)
+- [x] Recordatorios automáticos antes de la cita
 - [ ] Recordatorios WhatsApp
 - [ ] Videollamadas (Google Meet)
 - [ ] Multi-profesional (varios perfiles)
