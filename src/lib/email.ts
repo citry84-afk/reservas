@@ -2,15 +2,18 @@ import { Resend } from "resend";
 import { formatDateSpanish, formatPrice } from "@/lib/slots";
 import type { Booking, Provider, Service } from "@/db/schema";
 
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
+const apiKey = process.env.RESEND_API_KEY ?? process.env.resend;
+
+const resend = apiKey ? new Resend(apiKey) : null;
 
 const fromEmail =
   process.env.EMAIL_FROM ?? "ReservaYa <onboarding@resend.dev>";
 
 const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  process.env.NEXT_PUBLIC_APP_URL ??
+  (process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000");
 
 type BookingEmailData = {
   booking: Pick<
